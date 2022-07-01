@@ -1,48 +1,23 @@
-# Update 06/30/2022, 3:26 PM:
-# Took code from https://stackoverflow.com/questions/17025300/dictionary-of-folders-and-subfolders
-# to act as a framework to navigate the files
-import pandas as pd
 import os
-
-master_List = []
-
-
-def get_listings(directory):
-
-    parent, folder = os.path.split(directory)  # splits a file pathname into a head and a tail
-    listings = {
-        'folder': folder,
-        'children-files': [],
-        'children-folders': [],
-    }
-
-    children = os.listdir(directory)
-    for child in children:
-        child_path = os.path.join(directory, child)
-        if os.path.isdir(child_path):
-            listings['children-folders'] += [get_listings( child_path )]
-        else:
-            listings['children-files'] += [child]
-            master_List.append(child)
-            for t in master_List:
-                if ('html' in t):
-                    master_List.remove(t)
-            print(child, "added to master_List")
-
-    #TODO: sorting csv files into lists based on serial numbers.
-    # Make a new list for new serial numbers or add to an existing list.
-
-    #TODO: sorting these lists based on date
-
-    #TODO: splitting these lists into two: press/Temp
-
-    #TODO: output combined csv files with the name based on the serial number and press/Temp
+import pandas as pd
 
 
-    return listings
+def list_files(filepath, filetype):
+    paths = []
+    for root, dirs, files in os.walk(filepath):
+        for file in files:
+            if file.lower().endswith(filetype.lower()):
+                paths.append(os.path.join(root, file))
+    return paths
 
 
-t_directory = './ATC Result 2022-0613'
-get_listings(t_directory)
-print(master_List)
+csv_list = list_files('ATC Result 2022-0613', "csv")
+print(csv_list)
 
+for scan in csv_list:
+    path_parse = scan.split("/")
+    #path_parse
+    parsed = path_parse[2].split("_")
+    print(parsed)
+
+print(csv_list)
