@@ -23,13 +23,19 @@ def get_listings(directory):
             listings['children-folders'] += [get_listings( child_path )]
         else:
             listings['children-files'] += [child]
-            if ~('.html' in child):
-                master_List.append(child)
-                print(child, "added to master_List")
+            master_List.append(child)
+            for t in master_List:
+                if ('html' in t):
+                    master_List.remove(t)
+            print(child, "added to master_List")
 
-    #TODO: sorting csv files into lists based on serial number.
+    #TODO: sorting csv files into lists based on serial numbers.
+    # Make a new list for new serial numbers or add to an existing list.
+
     #TODO: sorting these lists based on date
-    #TODO: splitting this lists into two: press/Temp
+
+    #TODO: splitting these lists into two: press/Temp
+
     #TODO: output combined csv files with the name based on the serial number and press/Temp
 
 
