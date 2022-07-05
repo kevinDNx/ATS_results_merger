@@ -1,6 +1,6 @@
 import os
-import glob
 import pandas as pd
+import numpy
 
 
 def list_files(filepath, filetype):
@@ -30,10 +30,14 @@ for scan in csv_list:
         #print(merge_list)
         #print(press_list)
         #print(temp_list)
-        #TODO: combine all elements in press_list and temp_list.
-        press_combine = pd.concat([pd.read_csv(f) for f in press_list])
-        #print(press_combine)
-        temp_combine = pd.concat([pd.read_csv(f) for f in temp_list])
+        #TODO: combine all elements in press_list and temp_list. Maybe add the date columns before combining
+        press_combine = pd.concat([pd.read_csv(f).assign(SN = f.split("/")[2].split("_")[0]).assign(Date = pd.to_datetime(f.split("/")[2].split("_")[1]))  for f in press_list], ignore_index=1)
+        print(press_combine)
+        press_combine.to_csv('%s_press.csv' % (snum))
+        temp_combine = pd.concat([pd.read_csv(f).assign(SN = f.split("/")[2].split("_")[0]).assign(Date = pd.to_datetime(f.split("/")[2].split("_")[1])) for f in temp_list], ignore_index=1)
         print(temp_combine)
+        press_combine.to_csv('%s_test.csv' % (snum))
         #TODO: make a writer to write the list of csv files to the same output file and sheet
         # Use snum, press_list, and merge_list.
+        #break
+    #break
