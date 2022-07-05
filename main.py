@@ -1,7 +1,7 @@
 import os
 import pandas as pd
+import dask.dataframe as dd
 import numpy
-
 
 def list_files(filepath, filetype):
     paths = []
@@ -12,31 +12,48 @@ def list_files(filepath, filetype):
     return paths
 
 
-csv_list = list_files('ATC Result 2022-0613', "csv")
+def parseHelper(badParse):
+    if 'Modified script' in badParse or 'Unmodified script' in badParse or 'Morning' in badParse:
+        return badParse.split("\\")[4].split("_")
+    else:
+        return badParse.split("\\")[3].split("_")
+                                             
+
+csv_list = list_files('C:\ATC Result 2020-0613', "csv")
+
 #TODO: insert function to sort csv_list by date
+#TODO: Account for 'Modified script' in the filepath.
 #print(csv_list)
 snum_list = []
 for scan in csv_list:
-    path_parse = scan.split("/")
-    # path_parse
-    parsed = path_parse[2].split("_")
-    # print(parsed)
+    path_parse = scan.split("\\")
+    #print(path_parse)
+    if 'Modified script' in path_parse or 'Unmodified script' in path_parse or 'Morning' in path_parse:
+        parsed = path_parse[4].split("_")
+    else:
+        parsed = path_parse[3].split("_")
+    #print(parsed)
     snum = parsed[0]
+    #print(scan.split("\\")[3].split("_")[0])
+    #print(snum)
     if snum not in snum_list:
         snum_list += [snum]
         merge_list = list(filter(lambda x: snum in x, csv_list))
         press_list = list(filter(lambda x: 'press' in x, merge_list))
         temp_list = list(filter(lambda x: 'Temp' in x, merge_list))
         #print(merge_list)
-        #print(press_list)
+        print(press_list)
         #print(temp_list)
         #TODO: combine all elements in press_list and temp_list. Maybe add the date columns before combining
-        press_combine = pd.concat([pd.read_csv(f).assign(SN = f.split("/")[2].split("_")[0]).assign(Date = pd.to_datetime(f.split("/")[2].split("_")[1]))  for f in press_list], ignore_index=1)
+        press_combine = dd.concat([dd.read_csv(f).assign(SN=parseHelper(f)[0]).assign(
+            Date=parseHelper(f)[1]) for f in press_list])
         print(press_combine)
-        press_combine.to_csv('%s_press.csv' % (snum))
-        temp_combine = pd.concat([pd.read_csv(f).assign(SN = f.split("/")[2].split("_")[0]).assign(Date = pd.to_datetime(f.split("/")[2].split("_")[1])) for f in temp_list], ignore_index=1)
+        press_combine.to_csv('%s_press.csv' % (snum), single_file=1)
+
+        temp_combine = dd.concat([dd.read_csv(f).assign(SN=parseHelper(f)[0]).assign(
+            Date=parseHelper(f)[1]) for f in temp_list])
         print(temp_combine)
-        press_combine.to_csv('%s_test.csv' % (snum))
+        temp_combine.to_csv('%s_temp.csv' % (snum), single_file=1)
         #TODO: make a writer to write the list of csv files to the same output file and sheet
         # Use snum, press_list, and merge_list.
         #break
